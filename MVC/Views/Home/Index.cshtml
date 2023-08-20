@@ -1,0 +1,29 @@
+﻿@{
+    ViewData["Title"] = "Home page";
+}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <link rel="stylesheet" href="~/css/home.css" type="text/css">
+        <script>
+            function reloadIt() {
+                if (window.location.href.substr(-2) !== "?r") {
+                    window.location = window.location.href + "?r";
+                }
+            }
+            setTimeout('reloadIt()', 10)();
+        </script>
+    </head>
+    <body>
+        <h1>RACE:CODE</h1>
+        <h2>AUTHORIZATION</h2>
+
+        <form method="post">
+            <input name="login" id="field1" placeholder="LOGIN"/><br />
+            <input name="password" id="field2" placeholder="PASSWORD"/><br />
+            <input type="submit" value="GO!" id="go"/>
+        </form>   
+    </body>
+</html>
+

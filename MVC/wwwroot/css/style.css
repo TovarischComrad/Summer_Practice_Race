@@ -1,0 +1,25 @@
+﻿body {
+    overflow: hidden;
+}
+
+.info {
+    right: 50px;
+    bottom: 50px;
+    width: 200px;
+    height: 150px;
+    background-color: lightblue;
+    position: absolute;
+    border: 5px outset red;
+    z-index: 5;
+}
+
+.field {
+    padding-left: 25px;
+    padding-top: 25px;
+    width: 50px;
+    display: inline-block;
+}
+
+.value {
+    display: inline-block;
+}

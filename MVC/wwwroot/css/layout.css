@@ -1,0 +1,25 @@
+﻿li {
+    margin: 0 20px;
+}
+
+#privacy {
+    text-align: center;
+    color: #888888;
+    font-family: 'Pitcrew';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 24px;
+    letter-spacing: 0.08em;
+}
+
+#mydiv {
+    margin-left: 52px !important;
+}
+
+#mypad {
+    padding-left: 32px !important;
+}
+
+#privacy_btn {
+    color: #888888;
+}

@@ -1,0 +1,188 @@
+﻿@using Microsoft.AspNetCore.Mvc;
+@using Microsoft.AspNetCore.Authorization;
+@model int[]
+@{
+	Layout = "";    
+}
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8"/>
+		<title>Code Race</title>
+		<link rel="stylesheet" href="~/css/style.css" type="text/css">
+		<!-- Стили -->
+		<style>
+			body {
+				overflow: hidden;
+				background-color: rgb(55, 85, 30);
+			}
+		</style>
+		<!-- Подключение библиотеки jQuery -->
+		<script 
+			src="https://code.jquery.com/jquery-3.6.0.js" 
+			integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" 
+			crossorigin="anonymous">
+		</script>
+		<!-- Аналог скрипта первого этапа -->
+		<script>
+			var objects = [];
+			const urlParams = new URLSearchParams(window.location.search);
+			const gameId = urlParams.get("gameId");
+			const userId = urlParams.get("userId");
+
+			// ОПТИМИЗИРОВАТЬ
+			function myRender(serverObject) {
+				if (serverObject.ObjectType == "Border") {
+					let d = document.createElement("div");
+					d.style.width = serverObject.Width + "px";
+					d.style.height = serverObject.Height + "px";
+					// d.style.backgroundImage = serverObject.BackgroundImage;
+                    d.style.backgroundColor = "red";
+					d.style.bottom = serverObject.Bottom + "px";
+					d.style.left = serverObject.Left + "px";
+					// d.style.backgroundSize = "contain";
+					d.style.position = "absolute";
+					// d.style.position = "relative";
+					d.id = serverObject.Id;
+					d.className = serverObject.ObjectType;
+					document.body.appendChild(d);
+				}
+                if (serverObject.ObjectType == "RaceCar") {
+					let d = document.createElement("div");
+					d.style.width = serverObject.Width + "px";
+					d.style.height = serverObject.Height + "px";
+					d.style.backgroundImage = "url(/texture/car.png)"
+                    // d.style.backgroundColor = serverObject.Color;
+					d.style.bottom = serverObject.Bottom + "px";
+					d.style.left = serverObject.Left + "px";
+					 d.style.backgroundSize = "contain";
+					d.style.position = "absolute";
+					// d.style.position = "relative";
+                    d.style.zIndex = -1;
+					d.id = serverObject.Id;
+					d.className = serverObject.ObjectType;
+					document.body.appendChild(d);
+				}
+				if (serverObject.ObjectType == "Center") {
+					let d = document.createElement("div");
+					d.style.width = serverObject.Width + "px";
+					d.style.height = serverObject.Height + "px";
+					// d.style.backgroundImage = serverObject.BackgroundImage;
+                    d.style.backgroundColor = "green";
+					d.style.bottom = serverObject.Bottom + "px";
+					d.style.left = serverObject.Left + "px";
+					// d.style.backgroundSize = "contain";
+					d.style.position = "absolute";
+					// d.style.position = "relative";
+					d.id = serverObject.Id;
+					d.className = serverObject.ObjectType;
+					document.body.appendChild(d);
+				}
+                if (serverObject.ObjectType == "Map") {
+					let d = document.createElement("div");
+					d.style.width = serverObject.Width + "px";
+					d.style.height = serverObject.Height + "px";
+					d.style.backgroundImage = serverObject.BackgroundImage;
+                    //d.style.backgroundColor = "green";
+					d.style.bottom = serverObject.Bottom + "px";
+					d.style.left = serverObject.Left + "px";
+					d.style.backgroundSize = "contain";
+					d.style.position = "absolute";
+					// d.style.position = "relative";
+                    d.style.zIndex = -2;
+					d.id = serverObject.Id;
+					d.className = serverObject.ObjectType;
+					document.body.appendChild(d);
+				}
+			}
+
+			// Обновление экрана
+			function refresh() {
+				$.get("https://localhost:7271/Game/GetElements?gameId=" + gameId + "&userId=" + userId, function(data) {
+                    var arr = JSON.parse(data);
+					// Перезагрузка страницы при выходе игрока
+                    if (arr.length < objects.length) {
+                        location.reload();
+					}
+                    for (var i = 0; i < arr.length; i++) {
+						// Проверка на наличие объекта
+						var fl = false;
+                        for (var j = 0; j < objects.length; j++) {     
+                            if (arr[i].Id == objects[j].Id) {
+                                fl = true;
+                                break;
+							}
+						}
+						// Отрисовка всех игровых объектов
+                        if (arr[i].ObjectType == "Map" && fl) {
+							document.body.removeChild(document.getElementById(arr[i].Id));
+							myRender(arr[i]);
+						}
+						// Отрисованные автомобили
+                        if (arr[i].ObjectType == "RaceCar" && fl) {
+                            document.body.removeChild(document.getElementById(arr[i].Id));
+                            var theta = arr[i].Rotation;
+							myRender(arr[i]);
+							document.getElementById(arr[i].Id).style.webkitTransform = 'rotate(' + theta + 'deg)';
+						}
+						// Неотрисованные автомобили
+                        if (arr[i].ObjectType == "RaceCar" && !fl) {
+							myRender(arr[i]);
+						}
+                        if (arr[i].ObjectType == "RaceCar" && arr[i].userId == userId) {
+							document.getElementById("gear").innerHTML = arr[i].Front ? "D" : "R";
+							document.getElementById("speed").innerHTML = parseInt(arr[i].Speed / arr[i].Acceleration, 10);
+							//document.getElementById("speed2").innerHTML = parseInt(Math.sqrt(arr[i].Speed * arr[i].Speed + arr[i].SideSpeed * arr[i].SideSpeed) / arr[i].Acceleration, 10);
+                            //document.getElementById("acceleration").innerHTML = arr[i].Acceleration;
+						}
+					}
+					// document.body.removeChild(document.getElementById("information");
+                    // $("#information").hide().show(0);
+                    objects = arr;          
+				})
+			}
+
+			// Обработчик нажатия клавиш
+			document.addEventListener("keydown", function(event) {
+                $.get("https://localhost:7271/Game/PressButton?isDown=true&gameId=" + gameId + "&userId=" + userId + "&btn=" + event.keyCode);
+			})
+
+			// Обработчик отжатия клавиш
+			document.addEventListener("keyup", function(event) {
+                $.get("https://localhost:7271/Game/PressButton?isDown=false&gameId=" + gameId + "&userId=" + userId + "&btn=" + event.keyCode);
+			})
+
+			// Отрисовка всех объектов при загрузке страницы
+			document.addEventListener("DOMContentLoaded", function() {
+                $.get("https://localhost:7271/Game/GetElements?gameId=" + gameId + "&userId=" + userId, function(data) {
+                    var arr = JSON.parse(data);
+                    for (var i = 0; i < arr.length; i++) {
+						if (arr[i].ObjectType != "Center") {
+							myRender(arr[i]);
+						}
+					}
+                    objects = arr;
+				})
+
+			})
+
+			// Вызов функции refresh каждые 20 мс
+			var playInterval = setInterval(refresh, 20);
+
+		</script>
+	</head>
+	<body>
+		<div class="info" id="information">
+			<div class="field">Gear:</div>
+			<div class="value" id="gear"></div>
+			<br />
+			<div class="field">Speed:</div>
+			<div class="value" id="speed"></div>
+			<br />
+@*			<div class="field">Speed:</div>
+			<div class="value" id="speed2"></div>
+			<br />*@
+			<a class="field" asp-area="" asp-controller="Game" asp-action="Return" asp-route-gameId=@Model[0] asp-route-userId=@Model[1]>Finish</a>
+		</div>
+	</body>
+</html>
